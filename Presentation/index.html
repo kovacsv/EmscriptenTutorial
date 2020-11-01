@@ -1,0 +1,461 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Compile C++ to Web</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/league2.css" id="theme">
+		
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+		
+		<style>
+			code
+			{
+				tab-size : 4;
+				-moz-tab-size : 4;
+			}
+			
+			pre.console
+			{
+				background : #222222;
+				padding : 1.0em;
+				border-radius : 0.5em;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h2>Compile C++ to Web</h2>
+				</section>
+				<section>
+					<h2>WebAssembly</h2>
+					<ul>
+						<li>Portable binary-code format for high-performance applications on web pages</li>
+						<li>Started by Mozilla, now it's a web standard</li>
+						<li>Supported in all major browsers</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Emscripten</h2>
+					<ul>
+						<li>Compiles C and C++ to WebAssembly</li>
+						<li>Runs as a backend to the LLVM compiler</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Install Emscripten</h2>
+					<p>Download the latest build</p>
+					<pre class="console">git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+git pull
+emsdk install latest
+emsdk activate latest
+emsdk install mingw-4.6.2-32bit
+emsdk activate mingw-4.6.2-32bit</pre>
+					<p>Set up environment variables</p>
+					<pre class="console">emsdk_env.bat</pre>						
+				</section>
+				<section>
+					<h2>My Developer Environment</h2>
+					<ul>
+						<li>CMake file for creating projects</li>
+						<li>Visual Studio Project for debugging</li>
+						<li>Makefile for Emscripten compilation</li>
+						<li>Keep both of them working</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Hello World</h2>
+				</section>
+				<section>
+					<h2>Hello World</h2>
+					<pre class="cpp"><code class="hljs" data-trim data-line-numbers>
+						#include &lt;iostream&gt;
+
+						int main (int, char**)
+						{
+							std::cout << "Hello World!" << std::endl;
+							return EXIT_SUCCESS;
+						}
+					</code></pre>
+					<pre class="console">em++ main.cpp</pre>
+					<pre class="console">em++ main.cpp -o index.html</pre>
+				</section>
+				<section>
+					<h2>Hello World</h2>
+					<ul>
+						<li>Compilation result:
+							<ul>
+								<li><b>index.wasm:</b> The WebAssembly file</li>
+								<li><b>index.js:</b> The JavaScript file to load and execute it</li>
+								<li><b>index.html:</b> The example web for testing</li>
+							</ul>
+						</li>
+						<li>You will need a web server to try out</li>
+					</ul>
+					<p class="fragment"><a href="http://localhost/EmscriptenDemo/01_hello_world">Demo</a></p>
+				</section>
+				<section>
+					<img data-src="images/useful.png">
+				</section>
+				<section>
+					<h2>SDL</h2>
+				</section>
+				<section>
+					<h2>SDL</h2>
+					<ul>
+						<li>Simple DirectMedia Layer (<a href="https://www.libsdl.org">https://www.libsdl.org</a>)</li>
+						<li>Cross-platform library to access low-level input for graphics and audio</li>
+						<li>Uses native backend on every platform (OpenGL, DirectX, Metal, etc.)</li>
+						<li>It has an Emscripten port!</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Draw a Line</h2>
+				</section>
+				<section>
+					<h2>Draw a Line</h2>
+					<pre class="cpp" data-id="code-animation"><code style="font-size: 0.7em; line-height: 1.4em;" class="hljs" data-trim data-line-numbers="26-45|12-24|1-10">
+						static void Render (SDL_Renderer* renderer)
+						{
+							SDL_SetRenderDrawColor (renderer, 255, 255, 255, 255);
+							SDL_RenderClear (renderer);
+
+							SDL_SetRenderDrawColor (renderer, 0, 0, 200, 255);
+							SDL_RenderDrawLine (renderer, 10, 10, 200, 100);
+
+							SDL_RenderPresent (renderer);
+						}
+
+						static bool MainLoop (SDL_Renderer* renderer)
+						{
+							SDL_Event sdlEvent;
+							if (SDL_PollEvent (&sdlEvent)) {
+								switch (sdlEvent.type) {
+									case SDL_QUIT:
+										return false;
+								}
+							}
+
+							Render (renderer);
+							return true;
+						}
+
+						int main (int, char**)
+						{
+							SDL_Init (SDL_INIT_VIDEO);
+							SDL_Window* window = SDL_CreateWindow (
+								"Demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, 0
+							);
+							SDL_Renderer* renderer = SDL_CreateRenderer (window, -1, 0);
+							while (true) {
+								if (!MainLoop (renderer)) {
+									break;
+								}
+							}
+							SDL_DestroyRenderer (renderer);
+							SDL_DestroyWindow (window);
+							SDL_Quit ();
+							return EXIT_SUCCESS;
+						}
+					</code></pre>
+				</section>
+				<section>
+					<h2>Draw a Line (Compile)</h2>
+					<ul>
+						<li>We have to tell Emscripten that we want to use SDL2</li>
+						<li>We also have to export the main function to call when the browser loaded</li>
+					</ul>						
+					<pre class="console" style="font-size:1.0em">em++ main.cpp
+  <span style="color:#00cc00">-sUSE_SDL=2
+  -sEXPORTED_FUNCTIONS=["_main"]</span></pre>
+				</section>
+				<section>
+					<h2>Draw a Line (HTML)</h2>
+					<pre><code style="font-size: 0.7em; line-height: 1.4em;" class="hljs" data-trim data-line-numbers="|9-13">
+						&lt;!DOCTYPE html&gt;
+						&lt;html&gt;
+						&lt;head&gt;
+							&lt;title&gt;Demo&lt;/title&gt;
+						&lt;/head&gt;
+						&lt;body&gt;
+							&lt;canvas id=&quot;canvas&quot; oncontextmenu=&quot;event.preventDefault ()&quot;&gt;&lt;/canvas&gt;
+							&lt;script type='text/javascript'&gt;
+								var Module = {
+									canvas : (function () {
+										return document.getElementById ('canvas');
+									}) ()
+								};
+							&lt;/script&gt;
+							&lt;script src=&quot;index.js&quot;&gt;&lt;/script&gt;
+						&lt;/body&gt;
+						&lt;/html&gt;
+					</code></pre>					
+					<a class="fragment" href="http://localhost/EmscriptenDemo/02_draw_line">Demo</a>
+				</section>
+				<section>
+					<img data-src="images/what.png">
+				</section>
+				<section>
+					<h2>Browser Event Model</h2>
+					<ul>
+						<li>Browser event model is co-operative multitasking</li>
+						<li>Each event has a "turn" to run and must return the control to the browser</li>
+						<li>In our example the WebAssembly never returns the control to the browser, so the browser is freezing</li>
+					</ul>
+				</section>
+				<section data-auto-animate>
+					<h2>Render Loop</h2>
+					<ul>
+						<li>We have to modify render loop for browser</li>
+						<li>We still want it to work natively</li>
+					</ul>					
+					<pre class="cpp" data-id="code-animation"><code style="overflow:hidden;" class="hljs" data-trim data-line-numbers>
+						while (true) {
+							if (!MainLoop (renderer)) {
+								break;
+							}
+						}
+					</code></pre>
+				</section>
+				<section data-auto-animate>
+					<h2>Render Loop</h2>
+					<ul>
+						<li>We have to modify render loop for browser</li>
+						<li>We still want it to work natively</li>
+					</ul>				
+					<pre class="cpp" data-id="code-animation"><code style="overflow:hidden;" class="hljs" data-trim data-line-numbers>
+						#ifdef EMSCRIPTEN
+						emscripten_set_main_loop_arg (MainLoop, renderer, 0, true);
+						#else
+						while (true) {
+							if (!MainLoop (renderer)) {
+								break;
+							}
+						}
+						#endif
+					</code></pre>
+					<a class="fragment" href="http://localhost/EmscriptenDemo/03_draw_line_loop">Demo</a>
+				</section>
+				<section>
+					<h2>Handle User Interactions</h2>
+				</section>
+				<section>
+					<h2>Handle User Interactions</h2>
+					<ul>
+						<li>Let the user draw the lines with the mouse</li>
+						<li>We have to implement it in C++ only</li>
+					</ul>					
+				</section>
+				<section>
+					<h2>Handle User Interactions</h2>
+					<pre class="cpp"><code style="font-size: 0.7em; line-height: 1.4em;" class="hljs" data-trim data-line-numbers>
+						static bool MainLoop (SDL_Renderer* renderer)
+						{
+							SDL_Event sdlEvent;
+							if (SDL_PollEvent (&sdlEvent)) {
+								switch (sdlEvent.type) {
+									case SDL_MOUSEBUTTONDOWN:
+										/* ... */
+										break;
+									case SDL_MOUSEBUTTONUP:
+										/* ... */
+										break;
+									case SDL_MOUSEMOTION:
+										/* ... */
+										break;
+								}
+							}
+							return true;
+						}
+					</code></pre>					
+					<a class="fragment" href="http://localhost/EmscriptenDemo/04_draw_line_interaction">Demo</a>
+				</section>
+				<section>
+					<h2>Call C++ from JavaScript</h2>
+				</section>
+				<section>
+					<h2>Call C++ from JavaScript</h2>
+					<ul>
+						<li>Let's create a button on the web page that clears the all the lines from the canvas</li>
+						<li>We have to export a function in the C++ code, and use it in JavaScript</li>
+					</ul>
+				</section>
+				<section>
+					<h2>C++ from JS (C++)</h2>
+					<pre class="cpp"><code class="hljs" data-trim data-line-numbers>
+						extern "C"
+						{
+
+							void ClearLines ()
+							{
+								if (gRenderer != nullptr) {
+									lines.clear ();
+									Render (gRenderer);
+								}
+							}
+
+						};
+					</code></pre>	
+				</section>
+				<section>
+					<h2>C++ from JS (Compile)</h2>
+					<ul>
+						<li>We have to export the desired function</li>
+						<li>We have to export ccall and cwrap, too</li>
+					</ul>						
+					<pre class="console" style="font-size:0.7em">em++ main.cpp
+  -sUSE_SDL=2
+  -sEXPORTED_FUNCTIONS=["_main"<span style="color:#00cc00">, "_ClearLines"</span>]
+  <span style="color:#00cc00">-sEXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap"]</span></pre>
+				</section>				
+				<section>
+					<h2>C++ from JS (JS)</h2>
+					<pre><code style="font-size: 0.7em; line-height: 1.4em;" class="hljs" data-trim data-line-numbers="|6-7">
+						&lt;script type='text/javascript'&gt;
+							var Module = null;
+						
+							function ClearLines ()
+							{
+								var clearLinesFunc = Module.cwrap ('ClearLines', null, []);
+								clearLinesFunc ();
+							}
+							
+							window.onload = function () {
+								var button = document.getElementById ('clearlines');
+								button.addEventListener ('click', function () {
+									ClearLines ();
+								});
+							};
+						&lt;/script&gt;
+					</code></pre>					
+					<a class="fragment" href="http://localhost/EmscriptenDemo/05_clear_lines">Demo</a>
+				</section>
+				<section>
+					<h2>Call JavaScript from C++</h2>
+				</section>
+				<section>
+					<h2>Call JavaScript from C++</h2>
+					<ul>
+						<li>Let's congratulate the user if they create 5 lines</li>
+						<li>To achieve this, we have to call a JavaScript function from the C++ code</li>
+					</ul>
+				</section>
+				<section>
+					<h2>JS from C++ (C++)</h2>
+					<pre class="cpp"><code class="hljs" data-trim data-line-numbers="|6-8">
+						case SDL_MOUSEBUTTONUP:
+							{
+								if (sdlEvent.button.button == 1) {
+									inInteraction = false;
+									#ifdef EMSCRIPTEN
+										EM_ASM ({
+											LineCreated ($0);
+										}, lines.size ());
+									#endif
+								}
+							}
+							break;
+					</code></pre>
+				</section>
+				<section>
+					<h2>JS from C++ (JS)</h2>
+					<pre><code class="hljs" data-trim data-line-numbers>
+						function LineCreated (numberOfLines)
+						{
+							if (numberOfLines == 5) {
+								var congratImg = document.getElementById ('congrat');
+								congratImg.style.display = 'block';
+							}
+						}
+					</code></pre>
+					<a class="fragment" href="http://localhost/EmscriptenDemo/06_line_congrat">Demo</a>
+				</section>
+				<section>
+					<h2>Handle Data Files</h2>
+				</section>
+				<section>
+					<h2>Handle Data Files</h2>
+					<ul>
+						<li>Let's initialize drawing from a file.</li>
+						<li>We have to load a text file from the computer.</li>
+					</ul>
+					<img class="fragment" data-src="images/open_file.png">
+				</section>
+				<section>
+					<h2>Handle Data Files (C++)</h2>
+					<pre class="cpp"><code class="hljs" data-trim data-line-numbers="|3">
+						static void LoadLinesFromFile (std::vector&lt;Line&gt;& resultLines)
+						{
+							std::ifstream file ("Assets/lines.txt");
+							if (file.is_open ()) {
+								int lineCount = 0;
+								file >> lineCount;
+								for (int i = 0; i < lineCount; i++) {
+									Line line;
+									file >> line.beg.x; file >> line.beg.y;
+									file >> line.end.x; file >> line.end.y;
+									resultLines.push_back (line);
+								}
+								file.close ();
+							}
+						}
+					</code></pre>
+				</section>
+				<section>
+					<h2>Handle Data Files (Compile)</h2>
+					<ul>
+						<li>We have to preload files in the Assets folder.</li>
+						<li>A new file will be created: <b>index.data</b>.</li>
+					</ul>						
+					<pre class="console" style="font-size:0.7em">em++ main.cpp
+  -sUSE_SDL=2
+  -sEXPORTED_FUNCTIONS=["_main", "_ClearLines"]
+  -sEXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap"]
+  <span style="color:#00cc00">--use-preload-plugins --preload-file Assets</span></pre>
+					<a class="fragment" href="http://localhost/EmscriptenDemo/07_load_file">Demo</a>
+				</section>
+				<section>
+					<h2>Debugging</h2>
+					<ul>
+						<li>There is debugging support in Emscripten.</li>
+						<li>You can debug C++ code right in the browser.</li>
+					</ul>						
+					<pre class="console" style="font-size:0.7em">em++ main.cpp
+  <span style="color:#00cc00">-g4</span>
+  -sUSE_SDL=2
+  -sEXPORTED_FUNCTIONS=["_main", "_ClearLines"]
+  -sEXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap"]
+  --use-preload-plugins --preload-file Assets</pre>
+					<a class="fragment" href="http://localhost/EmscriptenDemo/07_load_file">Demo</a>
+				</section>
+				<section>
+					<h2>THE END</h2>
+				</section>
+				</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<title>Demo</title>
+
+	<style>
+		html, body
+		{
+			font-family : arial;
+			font-size : 14px;
+		}
+	
+		canvas
+		{
+			border : 1px solid #cccccc;
+		}
+		
+		td
+		{
+			vertical-align : top;
+		}
+		
+		div.button
+		{
+			color : #fafafa;
+			background : #297fff;
+			float : left;
+			padding : 5px 10px;
+			border-radius : 5px;
+			cursor : pointer;
+		}
+	</style>
+
+	<script type='text/javascript'>
+		var Module = null;
+	
+		function ClearLines ()
+		{
+			var clearLinesFunc = Module.cwrap ('ClearLines', null, []);
+			clearLinesFunc ();
+		}
+		
+		window.onload = function () {
+			var button = document.getElementById ('clearlines');
+			button.addEventListener ('click', function () {
+				ClearLines ();
+			});
+		};
+	</script>
+</head>
+
+<body>
+	<table>
+		<tr>
+			<td>
+				<canvas id="canvas" oncontextmenu="event.preventDefault ()"></canvas>
+			</td>
+			<td>
+				<div class="button" id="clearlines">Clear Lines</div>
+			</td>
+		</tr>
+	</table>
+	<script type='text/javascript'>
+		Module = {
+			canvas : (function () {
+				return document.getElementById ('canvas');
+			}) ()
+		};
+	</script>
+	<script src="05_clear_lines.js"></script>
+</body>
+
+</html>
