@@ -50,3 +50,7 @@ EmscriptenBuild.bat C:\Emscripten\emsdk C:\xampp\htdocs\EmscriptenDemo Release
 
 - Set up a web server for the result folder.
 - Open it in a web browser.
+
+## Presentation
+
+You can find the presentation in the "Presentation" folder. The demo links are referring to the "http://localhost/EmscriptenDemo" url. You have to modify the links to your result url to make them work.
