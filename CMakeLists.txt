@@ -57,7 +57,7 @@ set (CMAKE_DEBUG_POSTFIX "Debug")
 
 add_definitions (-DUNICODE -D_UNICODE)
 
-project (EmscriptenDemo)
+project (EmscriptenTutorial)
 
 set (LibSourcesFolder Libs)
 set (SDLLibFolder ${LibSourcesFolder}/SDL2-2.0.12)
