@@ -2,6 +2,8 @@
 
 Tutorial for using Emscripten.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/g3bih5yhlu9hsrko?svg=true)](https://ci.appveyor.com/project/kovacsv/emscriptentutorial)
+
 ## Building on Windows
 
 ### 1. Install Prerequisites
