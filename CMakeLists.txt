@@ -42,9 +42,9 @@ function (AddSDLDependency projectName sdlLibFolder sdlTTFLibFolder exportedFunc
 		get_filename_component (SDLLibFolderFullPath "${sdlLibFolder}" ABSOLUTE)
 		get_filename_component (SDLTTFLibFolderFullPath "${sdlTTFLibFolder}" ABSOLUTE)
 		add_custom_command (TARGET ${projectName} POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy "${SDLLibFolderFullPath}/lib/x64/SDL2.dll" $<TARGET_FILE_DIR:${projectName}>
-			COMMAND ${CMAKE_COMMAND} -E copy "${SDLTTFLibFolderFullPath}/lib/x64/SDL2_ttf.dll" $<TARGET_FILE_DIR:${projectName}>
-			COMMAND ${CMAKE_COMMAND} -E copy "${SDLTTFLibFolderFullPath}/lib/x64/libfreetype-6.dll" $<TARGET_FILE_DIR:${projectName}>
+			COMMAND ${CMAKE_COMMAND} -E copy "${SDLLibFolderFullPath}/lib/x86/SDL2.dll" $<TARGET_FILE_DIR:${projectName}>
+			COMMAND ${CMAKE_COMMAND} -E copy "${SDLTTFLibFolderFullPath}/lib/x86/SDL2_ttf.dll" $<TARGET_FILE_DIR:${projectName}>
+			COMMAND ${CMAKE_COMMAND} -E copy "${SDLTTFLibFolderFullPath}/lib/x86/libfreetype-6.dll" $<TARGET_FILE_DIR:${projectName}>
 		)
 	endif ()
 endfunction ()
@@ -62,8 +62,8 @@ project (EmscriptenTutorial)
 set (LibSourcesFolder Libs)
 set (SDLLibFolder ${LibSourcesFolder}/SDL2-2.0.12)
 set (SDLTTFLibFolder ${LibSourcesFolder}/SDL2_ttf-2.0.15)
-link_directories (${SDLLibFolder}/lib/x64)
-link_directories (${SDLTTFLibFolder}/lib/x64)
+link_directories (${SDLLibFolder}/lib/x86)
+link_directories (${SDLTTFLibFolder}/lib/x86)
 
 InitProject (01_hello_world 01_hello_world)
 
