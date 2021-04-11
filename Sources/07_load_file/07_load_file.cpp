@@ -105,7 +105,7 @@ void ClearLines ()
 
 static void LoadLinesFromFile (std::vector<Line>& resultLines)
 {
-	std::ifstream file ("Assets/lines.txt");
+	std::ifstream file ("07_load_file_assets/07_load_file_lines.txt");
 	if (file.is_open ()) {
 		int lineCount = 0;
 		file >> lineCount;

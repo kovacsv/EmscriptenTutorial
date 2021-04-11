@@ -13,14 +13,24 @@ function (InitProject projectName projectFolder)
 	)
 
 	add_executable (${projectName} ${ProjectSourceFiles})
-	target_include_directories (${projectName} PUBLIC ${SourcesFolder})
-
-	target_compile_options (${projectName} PUBLIC "$<$<CONFIG:Debug>:-DDEBUG>")
 	if (WIN32)
 		target_compile_options (${projectName} PUBLIC /W4 /WX)
 	else ()
 		target_compile_options (${projectName} PUBLIC -Wall -Wextra -Werror)
 	endif ()
+	target_include_directories (${projectName} PUBLIC ${SourcesFolder})
+
+	if (${EMSCRIPTEN})
+		set_target_properties (${projectName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+	else ()
+		target_compile_options (${projectName} PUBLIC "$<$<CONFIG:Debug>:-DDEBUG>")
+		set_target_properties (${projectName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+	endif ()
+
+	get_filename_component (SourcesFolderFullPath "${SourcesFolder}" ABSOLUTE)
+	add_custom_command (TARGET ${projectName} PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory "${SourcesFolderFullPath}/web" $<TARGET_FILE_DIR:${projectName}>
+	)
 endfunction ()
 
 function (AddSDLDependency projectName sdlLibFolder sdlTTFLibFolder exportedFunctions)
@@ -84,16 +94,10 @@ AddSDLDependency (06_line_congrat ${SDLLibFolder} ${SDLTTFLibFolder} "\"_main\",
 
 InitProject (07_load_file 07_load_file)
 AddSDLDependency (07_load_file ${SDLLibFolder} ${SDLTTFLibFolder} "\"_main\", \"_ClearLines\"")
-
 get_filename_component (07_load_file_sources Sources/07_load_file ABSOLUTE)
+add_custom_command (TARGET 07_load_file PRE_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory "${07_load_file_sources}/07_load_file_assets" ${CMAKE_BINARY_DIR}/07_load_file_assets
+)
 if (${EMSCRIPTEN})
-	add_custom_command (TARGET 07_load_file PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory "${07_load_file_sources}/Assets" ${CMAKE_BINARY_DIR}/Assets
-	)
-	target_link_options (07_load_file PUBLIC --use-preload-plugins --preload-file Assets)
-else ()
-	add_custom_command (TARGET 07_load_file PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory "${07_load_file_sources}/Assets" $<TARGET_FILE_DIR:07_load_file>/Assets
-		COMMAND ${CMAKE_COMMAND} -E copy_directory "${07_load_file_sources}/Assets" ${CMAKE_BINARY_DIR}/Assets
-	)
+	target_link_options (07_load_file PUBLIC --use-preload-plugins --preload-file 07_load_file_assets)
 endif ()
