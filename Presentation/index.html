@@ -37,8 +37,8 @@
 				<section>
 					<h2>Why to use C++ for Web?</h2>
 					<ol>
-						<li>Performance is very important</li>
-						<li>You already have a bunch of code in C++</li>
+						<li class="fragment">Performance is very important</li>
+						<li class="fragment">You already have a bunch of code in C++</li>
 					</ol>
 				</section>
 				<section>
@@ -391,8 +391,8 @@ emsdk activate mingw-4.6.2-32bit</pre>
 				<section>
 					<h2>Handle Data Files</h2>
 					<ul>
-						<li>Let's initialize drawing from a file.</li>
-						<li>We have to load a text file from the computer.</li>
+						<li>Let's initialize drawing from a file</li>
+						<li>We have to load a text file from the computer</li>
 					</ul>
 					<img class="fragment" data-src="images/open_file.png">
 				</section>
@@ -419,8 +419,8 @@ emsdk activate mingw-4.6.2-32bit</pre>
 				<section>
 					<h2>Handle Data Files (Compile)</h2>
 					<ul>
-						<li>We have to preload files in the Assets folder.</li>
-						<li>A new file will be created: <b>index.data</b>.</li>
+						<li>We have to preload files in the Assets folder</li>
+						<li>A new file will be created: <b>index.data</b></li>
 					</ul>						
 					<pre class="console" style="font-size:0.7em">em++ main.cpp
   -sUSE_SDL=2
@@ -444,6 +444,74 @@ emsdk activate mingw-4.6.2-32bit</pre>
   --use-preload-plugins --preload-file Assets</pre>
 					<a class="fragment" href="http://localhost:8000/BuildEm/Debug/07_load_file.html">Demo</a>
 				</section>
+				<section>
+					<h2>Common pitfalls</h2>
+				</section>
+				<section>
+					<h2>32-bit vs 64-bit</h2>
+					<ul>
+						<li>WebAssembly is a 32-bit architecture at the moment</li>
+						<li>Your C++ code has to be 32-bit compatible</li>
+						<li>E.g. the size of size_t is 4 instead of 8</li>
+					</ul>						
+				</section>
+				<section>
+					<h2>Standard Library</h2>
+					<ul>
+						<li>Emscripten uses a portable libc implementation called <a href="https://musl.libc.org">musl</a></li>
+						<li>There are some issues with swprintf and locale settings, a setlocale call may solve the issues</li>
+					</ul>						
+				</section>
+				<section>
+					<h2>Blocking Events</h2>
+					<ul>
+						<li>In a desktop application there are events that block the execution (modal dialog, context menu, etc.)</li>
+						<li>You can't block the execution in a browser, because it will freeze in WebAssembly, and the browser never get it's turn again.</li>
+					</ul>
+				</section>	
+				<section>
+					<h2>Blocking Events</h2>
+					<ul>
+						<li>There is <a href="https://emscripten.org/docs/porting/asyncify.html">Asyncify</a> that instruments the code and makes it able to pause and resume, but it causes performance issues</li>
+						<li>To keep the performance you have to rethink your code design so everything can run asynchronously.</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Context Menu</h2>
+					<pre class="cpp"><code class="hljs" data-trim data-line-numbers>
+						static void DoContextMenuOperation () {
+							std::vector&lt;Item&gt; items = { Item::Delete, Item::Duplicate };
+							Item selectedItem = OpenContextMenu (items);
+							// execution is blocked while context menu is opened
+							
+							if (selectedItem == Item::Delete) {
+								DeleteSelectedElement ();
+							} else if (selectedItem == Item::Duplicate) {
+								DuplicateSelectedElement ();
+							}
+							RedrawCanvas ();
+						}
+					</code></pre>
+				</section>
+				<section>
+					<h2>Context Menu</h2>
+					<pre class="cpp"><code class="hljs" data-trim data-line-numbers="1-5|7-14">
+						static void DoContextMenuOperation () {
+							std::vector&lt;Item&gt; items = { Item::Delete, Item::Paste };
+							CallJavaScriptToOpenContextMenu (items);
+							// execution continues
+						}
+						
+						static void ContextMenuItemSelected (Item selectedItem) {
+							if (selectedItem == Item::Delete) {
+								DeleteSelectedElement ();
+							} else if (selectedItem == Item::Duplicate) {
+								DuplicateSelectedElement ();
+							}
+							RedrawCanvas ();
+						}
+					</code></pre>
+				</section>		
 				<section>
 					<h2>THE END</h2>
 				</section>
