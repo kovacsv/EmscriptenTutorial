@@ -38,4 +38,4 @@ after_build:
   - emsdk activate mingw-4.6.2-32bit
   - cd ..
   - mkdir WebApp
-  - EmscriptenBuild.bat c:\projects\EmscriptenTutorial\emsdk c:\projects\EmscriptenTutorial\WebApp %configuration%
+  - EmscriptenBuild.bat c:\projects\EmscriptenTutorial\emsdk %configuration%
