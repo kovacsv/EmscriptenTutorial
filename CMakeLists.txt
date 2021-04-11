@@ -21,6 +21,7 @@ function (InitProject projectName projectFolder)
 	target_include_directories (${projectName} PUBLIC ${SourcesFolder})
 
 	if (${EMSCRIPTEN})
+		target_compile_options (${projectName} PUBLIC "$<$<CONFIG:Debug>:-g>")
 		set_target_properties (${projectName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
 	else ()
 		target_compile_options (${projectName} PUBLIC "$<$<CONFIG:Debug>:-DDEBUG>")
