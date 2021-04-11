@@ -430,13 +430,14 @@ emsdk activate mingw-4.6.2-32bit</pre>
 					<a class="fragment" href="http://localhost:8000/BuildEm/Debug/07_load_file.html">Demo</a>
 				</section>
 				<section>
-					<h2>Debugging</h2>
+					<h2>Debugging in Google Chrome</h2>
 					<ul>
-						<li>There is debugging support in Emscripten.</li>
-						<li>You can debug C++ code right in the browser.</li>
+						<li>Download C/C++ DevTools support extension</li>
+						<li>Enable WebAssembly debugging in DevTools</li>
+						<li>Compile your code with source maps</li>
 					</ul>						
 					<pre class="console" style="font-size:0.7em">em++ main.cpp
-  <span style="color:#00cc00">-g4</span>
+  <span style="color:#00cc00">-gsource-map</span>
   -sUSE_SDL=2
   -sEXPORTED_FUNCTIONS=["_main", "_ClearLines"]
   -sEXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap"]
