@@ -18,6 +18,7 @@
 			{
 				tab-size : 4;
 				-moz-tab-size : 4;
+				overflow : hidden !important;
 			}
 			
 			pre.console
@@ -224,7 +225,7 @@ emsdk activate mingw-4.6.2-32bit</pre>
 						<li>We have to modify render loop for browser</li>
 						<li>We still want it to work natively</li>
 					</ul>					
-					<pre class="cpp" data-id="code-animation"><code style="overflow:hidden;" class="hljs" data-trim data-line-numbers>
+					<pre class="cpp" data-id="code-animation"><code class="hljs" data-trim data-line-numbers>
 						while (true) {
 							if (!MainLoop (renderer)) {
 								break;
@@ -238,7 +239,7 @@ emsdk activate mingw-4.6.2-32bit</pre>
 						<li>We have to modify render loop for browser</li>
 						<li>We still want it to work natively</li>
 					</ul>				
-					<pre class="cpp" data-id="code-animation"><code style="overflow:hidden;" class="hljs" data-trim data-line-numbers>
+					<pre class="cpp" data-id="code-animation"><code class="hljs" data-trim data-line-numbers>
 						#ifdef EMSCRIPTEN
 						emscripten_set_main_loop_arg (MainLoop, renderer, 0, true);
 						#else
