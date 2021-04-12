@@ -36,10 +36,10 @@
 				</section>
 				<section>
 					<h2>Why to use C++ for Web?</h2>
-					<ol>
+					<ul>
 						<li class="fragment">Performance is very important</li>
 						<li class="fragment">You already have a bunch of code in C++</li>
-					</ol>
+					</ul>
 				</section>
 				<section>
 					<h2>WebAssembly</h2>
@@ -445,7 +445,8 @@ emsdk activate mingw-4.6.2-32bit</pre>
 					<a class="fragment" href="http://localhost:8000/BuildEm/Debug/07_load_file.html">Demo</a>
 				</section>
 				<section>
-					<h2>Common pitfalls</h2>
+					<h2>The Dark Side of WebAssembly</h2>
+					<p>Life isn't roses all the way</p>
 				</section>
 				<section>
 					<h2>32-bit vs 64-bit</h2>
@@ -455,6 +456,18 @@ emsdk activate mingw-4.6.2-32bit</pre>
 						<li>E.g. the size of size_t is 4 instead of 8</li>
 					</ul>						
 				</section>
+				<section>
+					<h2>Memory Usage</h2>
+					<ul>
+						<li>Memory usage in the browser is limited by default</li>
+						<li>Fortunately there is an option to make it constantly growing if needed</li>
+					</ul>						
+					<pre class="console" style="font-size:0.7em">em++ main.cpp
+  -sUSE_SDL=2
+  <span style="color:#00cc00">-sALLOW_MEMORY_GROWTH=1</span>
+  -sEXPORTED_FUNCTIONS=["_main"]
+  -sEXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap"]</pre>
+				</section>				
 				<section>
 					<h2>Standard Library</h2>
 					<ul>
@@ -466,14 +479,14 @@ emsdk activate mingw-4.6.2-32bit</pre>
 					<h2>Blocking Events</h2>
 					<ul>
 						<li>In a desktop application there are events that block the execution (modal dialog, context menu, etc.)</li>
-						<li>You can't block the execution in a browser, because it will freeze in WebAssembly, and the browser never get it's turn again.</li>
+						<li>You can't block the execution in a browser, because it will freeze in WebAssembly, and the browser never get it's turn again</li>
 					</ul>
 				</section>	
 				<section>
 					<h2>Blocking Events</h2>
 					<ul>
 						<li>There is <a href="https://emscripten.org/docs/porting/asyncify.html">Asyncify</a> that instruments the code and makes it able to pause and resume, but it causes performance issues</li>
-						<li>To keep the performance you have to rethink your code design so everything can run asynchronously.</li>
+						<li>To keep the performance you have to rethink your code design so everything can run asynchronously</li>
 					</ul>
 				</section>
 				<section>
@@ -513,7 +526,18 @@ emsdk activate mingw-4.6.2-32bit</pre>
 					</code></pre>
 				</section>		
 				<section>
+					<h2>Summary</h2>
+					<ul>
+						<li class="fragment">WebAssembly and Emscripten are great tools to build high-performing web applications.</li>
+						<li class="fragment">On the other side, it has it's pitfalls and limitations.</li>
+						<li class="fragment">A lot of technology is out there, choose your technology wisely when targeting to web.</li>
+					</ul>
+				</section>				
+				<section>
 					<h2>THE END</h2>
+					<p>
+						<a href="https://github.com/kovacsv/EmscriptenTutorial">https://github.com/kovacsv/EmscriptenTutorial</a>
+					</p>
 				</section>
 				</div>
 		</div>
